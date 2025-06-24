@@ -48,7 +48,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
           <div className="text-center mb-8">
             <img 
-              src="/logo-prodair.png" 
+              src="./logo-prodair.png" 
               alt="Prod'Air" 
               className="w-16 h-16 mx-auto mb-4"
             />
