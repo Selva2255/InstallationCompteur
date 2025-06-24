@@ -26,7 +26,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
       <div className="relative z-10 text-center text-white px-8">
         <div className="mb-8 animate-pulse">
           <img 
-            src="/logo-prodair.png" 
+            src="./logo-prodair.png" 
             alt="Prod'Air Logo" 
             className="w-32 h-32 mx-auto mb-6 drop-shadow-2xl animate-bounce"
           />
@@ -39,7 +39,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
           
           <div className="flex items-center justify-center space-x-2 text-amber-300">
             <img 
-              src="/hadirate Al anwar.png" 
+              src="./hadirate Al anwar.png" 
               alt="Hadirate Al Anwar" 
               className="w-8 h-8"
             />
