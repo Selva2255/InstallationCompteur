@@ -20,10 +20,10 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
   });
   
   const [materialUsed, setMaterialUsed] = useState<MaterialUsed>({
-    electricCables: 0,
-    samplingCables: 0,
-    tubularCables: 0,
-    clamps: 0,
+    cosseElectrique: 0,
+    emboutsASertir: 0,
+    cosseTubulaire: 0,
+    collierDeSerrage: 0,
     cable25mm: 0,
     cable16mm: 0,
     cable10mm: 0
@@ -191,10 +191,10 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
       appKey: ''
     });
     setMaterialUsed({
-      electricCables: 0,
-      samplingCables: 0,
-      tubularCables: 0,
-      clamps: 0,
+      cosseElectrique: 0,
+      emboutsASertir: 0,
+      cosseTubulaire: 0,
+      collierDeSerrage: 0,
       cable25mm: 0,
       cable16mm: 0,
       cable10mm: 0
@@ -440,12 +440,12 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Câbles électriques
+                    Cosse Electrique
                   </label>
                   <input
                     type="number"
-                    name="electricCables"
-                    value={materialUsed.electricCables}
+                    name="cosseElectrique"
+                    value={materialUsed.cosseElectrique}
                     onChange={handleMaterialChange}
                     min="0"
                     step="1"
@@ -456,12 +456,12 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Câbles de prélèvement
+                    Embouts à sertir
                   </label>
                   <input
                     type="number"
-                    name="samplingCables"
-                    value={materialUsed.samplingCables}
+                    name="emboutsASertir"
+                    value={materialUsed.emboutsASertir}
                     onChange={handleMaterialChange}
                     min="0"
                     step="1"
@@ -472,12 +472,12 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Câbles tubulaires
+                    Cosse tubulaire
                   </label>
                   <input
                     type="number"
-                    name="tubularCables"
-                    value={materialUsed.tubularCables}
+                    name="cosseTubulaire"
+                    value={materialUsed.cosseTubulaire}
                     onChange={handleMaterialChange}
                     min="0"
                     step="1"
@@ -488,12 +488,12 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Colliers de serrage
+                    Collier de serrage
                   </label>
                   <input
                     type="number"
-                    name="clamps"
-                    value={materialUsed.clamps}
+                    name="collierDeSerrage"
+                    value={materialUsed.collierDeSerrage}
                     onChange={handleMaterialChange}
                     min="0"
                     step="1"
@@ -513,7 +513,7 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Câble 25mm (m)
+                      Cable de 25 mm (m)
                     </label>
                     <input
                       type="number"
@@ -529,7 +529,7 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Câble 16mm (m)
+                      Cable de 16 mm (m)
                     </label>
                     <input
                       type="number"
@@ -545,7 +545,7 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Câble 10mm (m)
+                      Cable de 10 mm (m)
                     </label>
                     <input
                       type="number"
@@ -564,7 +564,7 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
                 <div className="bg-white p-4 rounded-lg border border-orange-200 mt-4">
                   <h5 className="font-medium text-gray-700 mb-2">Résumé du matériel</h5>
                   <div className="text-sm text-gray-600 space-y-1">
-                    <p>Total équipements: {materialUsed.electricCables + materialUsed.samplingCables + materialUsed.tubularCables + materialUsed.clamps} unités</p>
+                    <p>Total équipements: {materialUsed.cosseElectrique + materialUsed.emboutsASertir + materialUsed.cosseTubulaire + materialUsed.collierDeSerrage} unités</p>
                     <p>Total câbles: {(materialUsed.cable25mm + materialUsed.cable16mm + materialUsed.cable10mm).toFixed(1)} mètres</p>
                   </div>
                 </div>
