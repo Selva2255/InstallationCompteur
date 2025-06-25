@@ -29,13 +29,13 @@ export const exportToCSV = (installations: Installation[]) => {
     'Précision GPS (m)',
     'Nombre de Photos',
     'Noms des Photos',
-    'Câbles électriques (unités)',
-    'Câbles de prélèvement (unités)',
-    'Câbles tubulaires (unités)',
-    'Colliers de serrage (unités)',
-    'Câble 25mm (m)',
-    'Câble 16mm (m)',
-    'Câble 10mm (m)',
+    'Cosse Electrique (unités)',
+    'Embouts à sertir (unités)',
+    'Cosse tubulaire (unités)',
+    'Collier de serrage (unités)',
+    'Cable de 25 mm (m)',
+    'Cable de 16 mm (m)',
+    'Cable de 10 mm (m)',
     'Total équipements (unités)',
     'Total câbles (m)'
   ];
@@ -43,10 +43,10 @@ export const exportToCSV = (installations: Installation[]) => {
   const csvContent = [
     headers.join(','),
     ...installations.map(installation => {
-      const totalEquipments = (installation.materialUsed?.electricCables || 0) + 
-                             (installation.materialUsed?.samplingCables || 0) + 
-                             (installation.materialUsed?.tubularCables || 0) + 
-                             (installation.materialUsed?.clamps || 0);
+      const totalEquipments = (installation.materialUsed?.cosseElectrique || 0) + 
+                             (installation.materialUsed?.emboutsASertir || 0) + 
+                             (installation.materialUsed?.cosseTubulaire || 0) + 
+                             (installation.materialUsed?.collierDeSerrage || 0);
       
       const totalCables = ((installation.materialUsed?.cable25mm || 0) + 
                           (installation.materialUsed?.cable16mm || 0) + 
@@ -76,10 +76,10 @@ export const exportToCSV = (installations: Installation[]) => {
               return `${installation.coffretCode}_${date}_${time}_${index + 1}.jpg`;
             }).join('; ')}"` : 
             'Aucune photo'),
-        installation.materialUsed?.electricCables || 0,
-        installation.materialUsed?.samplingCables || 0,
-        installation.materialUsed?.tubularCables || 0,
-        installation.materialUsed?.clamps || 0,
+        installation.materialUsed?.cosseElectrique || 0,
+        installation.materialUsed?.emboutsASertir || 0,
+        installation.materialUsed?.cosseTubulaire || 0,
+        installation.materialUsed?.collierDeSerrage || 0,
         installation.materialUsed?.cable25mm || 0,
         installation.materialUsed?.cable16mm || 0,
         installation.materialUsed?.cable10mm || 0,
@@ -113,14 +113,14 @@ export const shareViaWhatsApp = (installation: Installation) => {
 
   const materialInfo = installation.materialUsed ? 
     `📦 *Matériel consommé:*
-• Câbles électriques: ${installation.materialUsed.electricCables} unités
-• Câbles de prélèvement: ${installation.materialUsed.samplingCables} unités  
-• Câbles tubulaires: ${installation.materialUsed.tubularCables} unités
-• Colliers de serrage: ${installation.materialUsed.clamps} unités
-• Câble 25mm: ${installation.materialUsed.cable25mm}m
-• Câble 16mm: ${installation.materialUsed.cable16mm}m
-• Câble 10mm: ${installation.materialUsed.cable10mm}m
-• *Total:* ${(installation.materialUsed.electricCables + installation.materialUsed.samplingCables + installation.materialUsed.tubularCables + installation.materialUsed.clamps)} équipements, ${(installation.materialUsed.cable25mm + installation.materialUsed.cable16mm + installation.materialUsed.cable10mm).toFixed(1)}m de câbles` :
+• Cosse Electrique: ${installation.materialUsed.cosseElectrique} unités
+• Embouts à sertir: ${installation.materialUsed.emboutsASertir} unités  
+• Cosse tubulaire: ${installation.materialUsed.cosseTubulaire} unités
+• Collier de serrage: ${installation.materialUsed.collierDeSerrage} unités
+• Cable de 25 mm: ${installation.materialUsed.cable25mm}m
+• Cable de 16 mm: ${installation.materialUsed.cable16mm}m
+• Cable de 10 mm: ${installation.materialUsed.cable10mm}m
+• *Total:* ${(installation.materialUsed.cosseElectrique + installation.materialUsed.emboutsASertir + installation.materialUsed.cosseTubulaire + installation.materialUsed.collierDeSerrage)} équipements, ${(installation.materialUsed.cable25mm + installation.materialUsed.cable16mm + installation.materialUsed.cable10mm).toFixed(1)}m de câbles` :
     '📦 Aucun matériel renseigné';
 
   const message = `🔧 *Nouvelle Installation LoRa - Prod'Air*
