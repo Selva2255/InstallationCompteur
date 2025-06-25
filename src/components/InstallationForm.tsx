@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Upload, Save, Share, Download, MapPin, Zap, Key, X, Plus, Image, Navigation, Loader } from 'lucide-react';
+import { Camera, Upload, Save, Share, Download, MapPin, Zap, Key, X, Plus, Image, Navigation, Loader, Package, Cable } from 'lucide-react';
 import { zones } from '../data/zones';
-import { Installation, User, Location } from '../types';
+import { Installation, User, Location, MaterialUsed } from '../types';
 import { storage } from '../utils/storage';
-import { exportToCSV, shareViaWhatsApp } from '../utils/export';
+import { exportToCSV, shareViaWhatsApp, downloadPhoto } from '../utils/export';
 
 interface InstallationFormProps {
   user: User;
@@ -18,7 +18,19 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
     appEUI: '',
     appKey: ''
   });
+  
+  const [materialUsed, setMaterialUsed] = useState<MaterialUsed>({
+    electricCables: 0,
+    samplingCables: 0,
+    tubularCables: 0,
+    clamps: 0,
+    cable25mm: 0,
+    cable16mm: 0,
+    cable10mm: 0
+  });
+
   const [photos, setPhotos] = useState<string[]>([]);
+  const [photoNames, setPhotoNames] = useState<string[]>([]);
   const [location, setLocation] = useState<Location | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string>('');
@@ -83,17 +95,48 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMaterialChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setMaterialUsed(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
+  };
+
+  const generatePhotoName = (index?: number) => {
+    const now = new Date();
+    const date = now.toISOString().split('T')[0];
+    const time = `${now.getHours().toString().padStart(2, '0')}h${now.getMinutes().toString().padStart(2, '0')}m${now.getSeconds().toString().padStart(2, '0')}s`;
+    const photoIndex = index !== undefined ? index + 1 : photos.length + 1;
+    return `${formData.coffretCode || 'COFFRET'}_${date}_${time}_${photoIndex}.jpg`;
+  };
+
+  const handlePhotoCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      Array.from(files).forEach(file => {
+      const newPhotos: string[] = [];
+      const newPhotoNames: string[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         const reader = new FileReader();
-        reader.onload = (event) => {
-          const photoData = event.target?.result as string;
-          setPhotos(prev => [...prev, photoData]);
-        };
-        reader.readAsDataURL(file);
-      });
+        
+        await new Promise<void>((resolve) => {
+          reader.onload = (event) => {
+            const photoData = event.target?.result as string;
+            const photoName = generatePhotoName(photos.length + newPhotos.length);
+            
+            newPhotos.push(photoData);
+            newPhotoNames.push(photoName);
+            
+            // Télécharger automatiquement la photo sur l'appareil
+            downloadPhoto(photoData, photoName);
+            
+            resolve();
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      setPhotos(prev => [...prev, ...newPhotos]);
+      setPhotoNames(prev => [...prev, ...newPhotoNames]);
     }
     // Reset input value to allow selecting the same file again
     e.target.value = '';
@@ -101,13 +144,7 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
 
   const removePhoto = (index: number) => {
     setPhotos(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const generatePhotoName = (index: number) => {
-    const now = new Date();
-    const date = now.toISOString().split('T')[0];
-    const time = `${now.getHours().toString().padStart(2, '0')}h${now.getMinutes().toString().padStart(2, '0')}`;
-    return `${formData.coffretCode}_${date}_${time}_${index + 1}.jpg`;
+    setPhotoNames(prev => prev.filter((_, i) => i !== index));
   };
 
   const formatCoordinates = (lat: number, lng: number) => {
@@ -132,7 +169,9 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
       id: Date.now().toString(),
       ...formData,
       photos: photos,
+      photoNames: photoNames,
       location: location || undefined,
+      materialUsed: materialUsed,
       timestamp: new Date().toISOString(),
       userId: user.name
     };
@@ -151,7 +190,17 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
       appEUI: '',
       appKey: ''
     });
+    setMaterialUsed({
+      electricCables: 0,
+      samplingCables: 0,
+      tubularCables: 0,
+      clamps: 0,
+      cable25mm: 0,
+      cable16mm: 0,
+      cable10mm: 0
+    });
     setPhotos([]);
+    setPhotoNames([]);
     // Garder la localisation pour la prochaine installation
     setIsSubmitting(false);
   };
@@ -167,7 +216,9 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
         id: Date.now().toString(),
         ...formData,
         photos: photos,
+        photoNames: photoNames,
         location: location || undefined,
+        materialUsed: materialUsed,
         timestamp: new Date().toISOString(),
         userId: user.name
       };
@@ -372,6 +423,155 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
             </div>
           </div>
 
+          {/* Section Matériel Consommé */}
+          <div className="bg-orange-50 rounded-xl p-6 border border-orange-100">
+            <h3 className="text-lg font-semibold text-orange-800 mb-4 flex items-center">
+              <Package className="w-5 h-5 mr-2" />
+              Matériel Consommé
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Équipements */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-700 flex items-center">
+                  <Cable className="w-4 h-4 mr-2" />
+                  Équipements (unités)
+                </h4>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Câbles électriques
+                  </label>
+                  <input
+                    type="number"
+                    name="electricCables"
+                    value={materialUsed.electricCables}
+                    onChange={handleMaterialChange}
+                    min="0"
+                    step="1"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                    placeholder="0"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Câbles de prélèvement
+                  </label>
+                  <input
+                    type="number"
+                    name="samplingCables"
+                    value={materialUsed.samplingCables}
+                    onChange={handleMaterialChange}
+                    min="0"
+                    step="1"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                    placeholder="0"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Câbles tubulaires
+                  </label>
+                  <input
+                    type="number"
+                    name="tubularCables"
+                    value={materialUsed.tubularCables}
+                    onChange={handleMaterialChange}
+                    min="0"
+                    step="1"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                    placeholder="0"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Colliers de serrage
+                  </label>
+                  <input
+                    type="number"
+                    name="clamps"
+                    value={materialUsed.clamps}
+                    onChange={handleMaterialChange}
+                    min="0"
+                    step="1"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
+              {/* Câbles par diamètre */}
+              <div className="space-y-4 md:col-span-2 lg:col-span-2">
+                <h4 className="font-medium text-gray-700 flex items-center">
+                  <Cable className="w-4 h-4 mr-2" />
+                  Câbles par diamètre (mètres)
+                </h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Câble 25mm (m)
+                    </label>
+                    <input
+                      type="number"
+                      name="cable25mm"
+                      value={materialUsed.cable25mm}
+                      onChange={handleMaterialChange}
+                      min="0"
+                      step="0.1"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                      placeholder="0.0"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Câble 16mm (m)
+                    </label>
+                    <input
+                      type="number"
+                      name="cable16mm"
+                      value={materialUsed.cable16mm}
+                      onChange={handleMaterialChange}
+                      min="0"
+                      step="0.1"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                      placeholder="0.0"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Câble 10mm (m)
+                    </label>
+                    <input
+                      type="number"
+                      name="cable10mm"
+                      value={materialUsed.cable10mm}
+                      onChange={handleMaterialChange}
+                      min="0"
+                      step="0.1"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                      placeholder="0.0"
+                    />
+                  </div>
+                </div>
+
+                {/* Résumé du matériel */}
+                <div className="bg-white p-4 rounded-lg border border-orange-200 mt-4">
+                  <h5 className="font-medium text-gray-700 mb-2">Résumé du matériel</h5>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p>Total équipements: {materialUsed.electricCables + materialUsed.samplingCables + materialUsed.tubularCables + materialUsed.clamps} unités</p>
+                    <p>Total câbles: {(materialUsed.cable25mm + materialUsed.cable16mm + materialUsed.cable10mm).toFixed(1)} mètres</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Section Photos */}
           <div className="bg-amber-50 rounded-xl p-6 border border-amber-100">
             <h3 className="text-lg font-semibold text-amber-800 mb-4 flex items-center">
@@ -431,7 +631,10 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
                   </h4>
                   <button
                     type="button"
-                    onClick={() => setPhotos([])}
+                    onClick={() => {
+                      setPhotos([]);
+                      setPhotoNames([]);
+                    }}
                     className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors duration-200"
                   >
                     Supprimer toutes
@@ -454,7 +657,7 @@ const InstallationForm: React.FC<InstallationFormProps> = ({ user }) => {
                         <X className="w-4 h-4" />
                       </button>
                       <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2 rounded-b-lg">
-                        {generatePhotoName(index)}
+                        {photoNames[index] || generatePhotoName(index)}
                       </div>
                     </div>
                   ))}
