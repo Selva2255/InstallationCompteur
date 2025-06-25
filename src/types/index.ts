@@ -11,13 +11,13 @@ export interface Location {
 }
 
 export interface MaterialUsed {
-  electricCables: number;
-  samplingCables: number;
-  tubularCables: number;
-  clamps: number;
-  cable25mm: number; // en mètres
-  cable16mm: number; // en mètres
-  cable10mm: number; // en mètres
+  cosseElectrique: number; // Cosse Electrique (unités)
+  emboutsASertir: number; // Embouts à sertir (unités)
+  cosseTubulaire: number; // Cosse tubulaire (unités)
+  collierDeSerrage: number; // Collier de serrage (unités)
+  cable25mm: number; // Cable de 25 mm (mètres)
+  cable16mm: number; // Cable de 16 mm (mètres)
+  cable10mm: number; // Cable de 10 mm (mètres)
 }
 
 export interface Installation {
